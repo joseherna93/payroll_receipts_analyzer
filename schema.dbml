@@ -1,0 +1,68 @@
+// Archivo DBML para la base de datos payroll_app
+
+Project payroll_app {
+    Note: 'Base de datos para la aplicación de nómina'
+}
+
+// Tabla: emitter
+Table emitter {
+    id VARCHAR(50) [pk, note: 'Identificador del emisor']
+    name VARCHAR(100) [not null, note: 'Nombre del emisor']
+    fiscal_regime VARCHAR(50) [not null, note: 'Régimen fiscal del emisor']
+
+    Note: 'Información del emisor en la aplicación de nómina'
+}
+
+// Tabla: receiver
+Table receiver {
+    id VARCHAR(50) [pk, note: 'Identificador del receptor']
+    name VARCHAR(100) [not null, note: 'Nombre del receptor']
+    cfdi_use VARCHAR(50) [not null, note: 'Uso CFDI del receptor']
+    fiscal_address VARCHAR(255) [not null, note: 'Domicilio fiscal del receptor']
+    fiscal_regime VARCHAR(50) [not null, note: 'Régimen fiscal del receptor']
+
+    Note: 'Información del receptor en la aplicación de nómina'
+}
+
+// Tabla: payslip
+Table payslip {
+    id VARCHAR(50) [pk, note: 'Identificador de la nómina']
+    emitter_id VARCHAR(50) [ref: > emitter.id, note: 'Referencia al emisor']
+    receiver_id VARCHAR(50) [ref: > receiver.id, note: 'Referencia al receptor']
+    initial_payment_date DATE [not null, note: 'Fecha de inicio del periodo de pago']
+    final_payment_date DATE [not null, note: 'Fecha final del periodo de pago']
+    payment_date DATE [not null, note: 'Fecha de pago']
+    days_paid INT [not null, note: 'Número de días pagados']
+    type VARCHAR(50) [not null, note: 'Tipo de nómina']
+    total_deductions DECIMAL(10, 2) [not null, note: 'Total de deducciones']
+    total_other_payments DECIMAL(10, 2) [not null, note: 'Total de otros pagos']
+    total_perceptions DECIMAL(10, 2) [not null, note: 'Total de percepciones']
+    version VARCHAR(10) [not null, note: 'Versión de la nómina']
+
+    Note: 'Información de las nóminas en la aplicación'
+}
+
+// Tabla: movement_type
+Table movement_type {
+    id VARCHAR(4) [pk, note: 'Identificador del tipo de movimiento']
+    concept VARCHAR(100) [not null, note: 'Concepto del movimiento']
+    transaction_type VARCHAR(50) [not null, note: 'Tipo de transacción']
+    transaction_sub_type VARCHAR(50) [not null, note: 'Subtipo de transacción']
+
+    Note: 'Tipos de movimiento que pueden incluirse en la nómina'
+}
+
+// Tabla: movements
+Table movements {
+    payslip_id VARCHAR(50) [ref: > payslip.id, note: 'Referencia a la nómina']
+    movement_type_id VARCHAR(4) [ref: > movement_type.id, note: 'Referencia al tipo de movimiento']
+    exempt_amount DECIMAL(10, 2) [not null, note: 'Monto exento']
+    taxable_amount DECIMAL(10, 2) [not null, note: 'Monto gravable']
+    amount DECIMAL(10, 2) [not null, note: 'Monto total']
+
+    Indexes {
+        (payslip_id, movement_type_id) [pk]
+    }
+
+    Note: 'Movimientos específicos incluidos en cada nómina'
+}
